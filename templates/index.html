@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function confirmDelete(index) {
+            if (confirm("Are you sure you want to delete this expense?")) {
+                window.location.href = "/delete_expense/" + index;
+            }
+        }
+
+        function showExpenses(friend) {
+            var expenseRows = document.getElementsByClassName('expense-row');
+            for (var i = 0; i < expenseRows.length; i++) {
+                var friendName = expenseRows[i].getAttribute('data-friend');
+                if (friendName === friend || friend === 'all') {
+                    expenseRows[i].style.display = 'table-row';
+                } else {
+                    expenseRows[i].style.display = 'none';
+                }
+            }
+        }
+
+        function addFriend() {
+            var friendName = document.getElementById('friend-name').value;
+            if (friendName !== '') {
+                window.location.href = "/add_friend/" + friendName;
+            }
+        }
+
+        function removeFriend(index) {
+            if (confirm("Are you sure you want to remove this friend?")) {
+                window.location.href = "/remove_friend/" + index;
+            }
+        }
+
+        function editFriend(index) {
+            var newName = prompt("Enter the new name for the friend:");
+            if (newName !== null && newName !== '') {
+                window.location.href = "/edit_friend/" + index + "/" + newName;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Expense Tracker</h1>
+        <table>
+            <tr>
+                <th>Friend</th>
+                <th>Total Amount (&#8377;)</th>
+                <th>Actions</th>
+            </tr>
+            {% for friend, total_amount in friend_totals.items() %}
+            <tr>
+                <td><a href="#" onclick="showExpenses('{{ friend }}')">{{ friend }}</a></td>
+                <td>&#8377; {{ total_amount }}</td>
+                <td class="actions">
+                    <a href="#" onclick="editFriend('{{ loop.index0 }}')">Edit</a>
+                    <a href="#" onclick="removeFriend('{{ loop.index0 }}')">Remove</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Expenses</h2>
+        <table>
+            <tr>
+                <th>Expense</th>
+                <th>Price (&#8377;)</th>
+                <th>Friend</th>
+                <th>Actions</th>
+            </tr>
+            {% set counter = 0 %}
+            {% for expense in expenses %}
+            <tr class="expense-row" data-friend="{{ expense['friend'] }}">
+                <td>{{ expense['name'] }}</td>
+                <td>&#8377; {{ expense['price'] }}</td>
+                <td>{{ expense['friend'] }}</td>
+                <td class="actions">
+                    <a href="{{ url_for('edit_expense', index=counter) }}">Edit</a>
+                    <a href="#" onclick="confirmDelete('{{ counter }}')">Delete</a>
+                </td>
+            </tr>
+            {% set counter = counter + 1 %}
+            {% endfor %}
+        </table>
+        <div class="actions">
+            <a href="{{ url_for('add_expense') }}">Add Expense</a>
+        </div>
+        <div class="friend-management">
+            <h2>Friend Management</h2>
+            <form class="add-friend-form" action="{{ url_for('add_friend') }}" method="POST">
+                <div class="friend-form">
+                    <label for="friend-name">Friend Name:</label>
+                    <input type="text" id="friend-name" name="friend_name" placeholder="Enter friend name" required>
+                </div>
+                <button type="submit">Add Friend</button>
+            </form>
+            {% set index = 0 %}
+            {% for friend in friends %}
+            <a class="remove-friend-link" href="#" onclick="removeFriend('{{ index }}')">Remove</a>
+
+            <label for="remove-friend-{{ index }}">Remove Friend:</label>
+            <form class="remove-friend-form" action="{{ url_for('remove_friend') }}" method="POST">
+                <input type="hidden" name="index" value="{{ index }}">
+                <select id="remove-friend-{{ index }}" name="friend_name" required>
+                    <option value="{{ friend }}">{{ friend }}</option>
+                </select>
+                <button type="submit">Remove Friend</button>
+            </form>
+            {% set index = index + 1 %}
+            {% endfor %}
+        </div>
+
+
+
+
+    </div>
+</body>
+
+</html>

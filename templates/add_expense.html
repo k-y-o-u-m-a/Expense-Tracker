@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Add Expense</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='add.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Add Expense</h1>
+
+        <form action="{{ url_for('add_expense') }}" method="POST">
+            <label for="name">Expense Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="price">Price (&#8377;):</label>
+            <input type="number" id="price" name="price" required>
+
+            <label for="friend">Friend:</label>
+            <select id="friend" name="friend" required>
+                <option value="">Select a friend</option>
+                {% for friend in friends %}
+                <option value="{{ friend }}">{{ friend }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Add Expense</button>
+        </form>
+
+        <a href="{{ url_for('index') }}">Back to Expenses</a>
+    </div>
+</body>
+
+</html>

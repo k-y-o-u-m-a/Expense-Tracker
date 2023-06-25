@@ -1,15 +1,69 @@
 from flask import Flask, render_template, request, redirect, url_for
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required, UserMixin
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+#User class for authentication
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = id
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    # Find the user with the given id
+    user = next((user for user in users if user['username'] == user_id), None)
+    
+    if user:
+        # Create a User object with the user's id
+        return User(user['username'])
+    
+    return None  # User not found
+
 
 # Initialize empty data structures
 expenses = []
 friend_totals = {}
-
+users = [
+    {'username': 'user1', 'password': 'password1'},
+    {'username': 'user2', 'password': 'password2'}
+]
 
 @app.route('/')
+@login_required
 def index():
     return render_template('index.html', expenses=expenses, friend_totals=friend_totals)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Check if the provided credentials match a user in the list
+        for user in users:
+            if user['username'] == username and user['password'] == password:
+                user_obj = User(username)
+                login_user(user_obj)
+                return redirect(url_for('index'))
+
+        # Invalid credentials
+        return render_template('login.html', error='Invalid username or password', friend_totals=friend_totals)
+
+    return render_template('login.html', friend_totals=friend_totals)
+
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 
 @app.route('/add_expense', methods=['GET', 'POST'])
@@ -102,6 +156,6 @@ def edit_friend(index, new_name):
     
     return redirect(url_for('index'))
 
-
+login_manager.login_view = 'login'
 if __name__ == '__main__':
     app.run(debug=True)

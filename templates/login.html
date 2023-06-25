@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login - Expense Tracker</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        {% if current_user.is_authenticated %}
+        <!-- User is logged in -->
+        {% else %}
+        <!-- User is not logged in -->
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="login-form-group">
+                <div class="login-form">
+                    <div class="login-username">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="login-password">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                <div class="login-button">
+                    <button type="submit">Login</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+
+    </div>
+</body>
+
+</html>
